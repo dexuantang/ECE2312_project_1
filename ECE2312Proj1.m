@@ -81,9 +81,9 @@ end
 %% A function that converts samples to seconds and does time domain plot
 function plot_time(audio_data,  record_length, my_title)
     figure;
-    time = linspace (0, record_length, length(audio_data));                   %create time in seconds
-    plot(time, audio_data);                                                   %plot it
-    xlabel("Time(seconds)");                                                  %labels and custom title
+    time = linspace (0, record_length, length(audio_data));                    %create time in seconds
+    plot(time, audio_data);                                                    %plot it
+    xlabel("Time(seconds)");                                                   %labels and custom title
     ylabel("Amplitude");
     title(my_title);
 end
@@ -91,18 +91,18 @@ end
 %% A fucntion that saves audio as a WAV file with GUI
 function save_audio_to_wav(audio_data, FS)
     disp("Please save the audio")
-    [filename, pathname] = uiputfile('*.wav', 'Save recorded audio as');    %get file and path
-    savepath = fullfile(pathname, filename);                                %combine to get full path
-    audiowrite(savepath, audio_data, FS);                                   %save with specified sample rate
+    [filename, pathname] = uiputfile('*.wav', 'Save recorded audio as');     %get file and path
+    savepath = fullfile(pathname, filename);                                 %combine to get full path
+    audiowrite(savepath, audio_data, FS);                                    %save with specified sample rate
     disp("done saving")
 end
 
 %% A fucntion that loads WAV audio with GUI
 function [y,FS] = load_audio_from_wav()
     disp("Please open an audio clip")
-    [filename, pathname] = uigetfile('*.wav');                              %get file and path
-    loadpath = fullfile(pathname, filename);                                %get full path
-    [y,FS] = audioread(loadpath);                                           %read audio data and sample rate 
+    [filename, pathname] = uigetfile('*.wav');                               %get file and path
+    loadpath = fullfile(pathname, filename);                                 %get full path
+    [y,FS] = audioread(loadpath);                                            %read audio data and sample rate 
     disp("done loading")
 end
 
