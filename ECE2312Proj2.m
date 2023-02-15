@@ -5,45 +5,19 @@ nBits = 8;
 nChannels = 1;
 record_length = 7;
 
-%% Call the main function
-main(FS, nBits, nChannels, record_length);
 
-%% Main function
-function main(FS, nBits, nChannels, record_length)
-    %% Select audio devices
-    [user_selected_input_ID, user_slected_output_ID] = get_user_selected_device();
+%% Select audio devices
+[user_selected_input_ID, user_slected_output_ID] = get_user_selected_device();
 
-    %% record, plot, save, and load the first clip
-    disp("recording the first clip")
-    [myVoice_1, audio_data_1] = record_voice(FS, nBits, nChannels, record_length, user_selected_input_ID);
-    plot_time(audio_data_1, record_length, "Time domain plot of the first clip");
-    plot_spectrogram(audio_data_1, FS, "Spectrogram of the first clip");
-    save_audio_to_wav(audio_data_1, FS);
-    [audio_data_loaded_1,FS_loaded] = load_audio_from_wav();
-    plot_spectrogram(audio_data_loaded_1, FS_loaded, "Spectrogram of the first WAV");
+sine = sinewave(record_length, 5000, FS);
+save_audio_to_wav(sine, FS);
+[sine_loaded,sine_FS_loaded] = load_audio_from_wav();
+plot_spectrogram(sine_loaded, sine_FS_loaded, "Spectrogram of 5000Hz sine");
 
-    %% record, plot, save, and load the second clip
-    disp("recording the second clip")
-    [myVoice_2, audio_data_2] = record_voice(FS, nBits, nChannels, record_length, user_selected_input_ID);
-    plot_time(audio_data_2, record_length, "Time domain plot of the second clip");
-    plot_spectrogram(audio_data_2, FS, "Spectrogram of the second clip");
-    save_audio_to_wav(audio_data_2, FS);
-    [audio_data_loaded_2,FS_loaded] = load_audio_from_wav();
-    plot_spectrogram(audio_data_loaded_2, FS_loaded, "Spectrogram of the second WAV");
 
-    %% record, plot, save, and load the third clip
-    disp("recording the third clip")
-    [myVoice_3, audio_data_3] = record_voice(FS, nBits, nChannels, record_length, user_selected_input_ID);
-    plot_time(audio_data_3, record_length, "Time domain plot of the third clip");
-    plot_spectrogram(audio_data_3, FS, "Spectrogram of the third clip");
-    save_audio_to_wav(audio_data_3, FS);
-    [audio_data_loaded_3,FS_loaded] = load_audio_from_wav();
-    plot_spectrogram(audio_data_loaded_3, FS_loaded, "Spectrogram of the third WAV");
-
-    %% Convert the third clip to mono and save as WAV
-    audio_data_stereo =  mono2stereo(audio_data_3);
-    save_audio_to_wav(audio_data_stereo, FS);
-end 
+%% load fox and plot
+[audio_data_loaded_1,FS_loaded] = load_audio_from_wav();
+plot_spectrogram(audio_data_loaded_1, FS_loaded, "Spectrogram of the first WAV");
 
 %% A function that lets the user select their audio device by typing them in the command window
 function [input_device_ID, output_device_ID] = get_user_selected_device()
@@ -56,6 +30,11 @@ function [input_device_ID, output_device_ID] = get_user_selected_device()
     disp ('list of output devices')
     disp(output_devices)                                                       %print out all output devices
     output_device_ID = input ('please select output device by typing its ID'); %get user input
+end
+
+function [output] = sinewave(record_length, F, FS)
+    n = 0:(1/FS):(record_length);
+    output = sin(2*pi*n*F);
 end
 
 %% A function that creates a recorder objects and records audio with specified parameters
@@ -91,18 +70,18 @@ end
 %% A fucntion that saves audio as a WAV file with GUI
 function save_audio_to_wav(audio_data, FS)
     disp("Please save the audio")
-    [filename, pathname] = uiputfile('*.wav', 'Save recorded audio as');     %get file and path
-    savepath = fullfile(pathname, filename);                                 %combine to get full path
-    audiowrite(savepath, audio_data, FS);                                    %save with specified sample rate
+    [filename, pathname] = uiputfile('*.wav', 'Save recorded audio as');      %get file and path
+    savepath = fullfile(pathname, filename);                                  %combine to get full path
+    audiowrite(savepath, audio_data, FS);                                     %save with specified sample rate
     disp("done saving")
 end
 
 %% A fucntion that loads WAV audio with GUI
 function [y,FS] = load_audio_from_wav()
     disp("Please open an audio clip")
-    [filename, pathname] = uigetfile('*.wav');                               %get file and path
-    loadpath = fullfile(pathname, filename);                                 %get full path
-    [y,FS] = audioread(loadpath);                                            %read audio data and sample rate 
+    [filename, pathname] = uigetfile('*.wav');                                %get file and path
+    loadpath = fullfile(pathname, filename);                                  %get full path
+    [y,FS] = audioread(loadpath);                                             %read audio data and sample rate 
     disp("done loading")
 end
 
