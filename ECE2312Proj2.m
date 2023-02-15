@@ -43,7 +43,7 @@ function [chirp] = sine_chirp(record_length, FI, FF, FS)
     n = 0:(1/FS):(record_length);
     f = linspace (FI, FF, length(n));   
     for i = 1:length(n)
-        chirp(i) = sin(2*pi*f(i)*n(i));
+        chirp(i) = sin(pi*f(i)*n(i));
     end
 end
 function [output] = sinewave(record_length, F, FS)
