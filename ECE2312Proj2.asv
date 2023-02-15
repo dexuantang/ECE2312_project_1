@@ -39,17 +39,25 @@ function [input_device_ID, output_device_ID] = get_user_selected_device()
 end
 
 function [chirp] = sine_chirp(record_length, FI, FF, FS)
-    cj
+    chirp = zeros;
     n = 0:(1/FS):(record_length);
     f = linspace (FI, FF, length(n));   
     for i = 1:length(n)
-        chirp(i) = sin(2*pi*f(i)*n(i));
+        chirp(i) = sin(pi*f(i)*n(i));
     end
 end
 function [output] = sinewave(record_length, F, FS)
     n = 0:(1/FS):(record_length);
     output = sin(2*pi*n*F);
 end
+
+%% CETK notes frequency: 1174.66, 1318.51, 1046.50, 523.25, 783.99
+function [cetk] = cetk(record_length, FS)
+    cetk = zeros;
+    note_durations = [0.5 0.7 1 0.7 4];
+    n = 0:(1/FS):(record_length);
+    f = zeros(length(n));
+    f[0:note_durations]
 
 %% A function that creates a recorder objects and records audio with specified parameters
 function [myVoice, audio_data] = record_voice(FS, nBits, nChannels, length, ID)

@@ -19,6 +19,8 @@ plot_spectrogram(sine_loaded, sine_FS_loaded, "Spectrogram of 5000Hz sine");
 
 chirp = sine_chirp(record_length, FI, FF, FS);
 plot_spectrogram(chirp, FS, "Spectrogram of chirp");
+cetk_sound = cetk(record_length, FS);
+plot_spectrogram(cetk_sound, FS, "Spectrogram of cetk");
 
 
 %% load fox and plot
@@ -49,6 +51,22 @@ end
 function [output] = sinewave(record_length, F, FS)
     n = 0:(1/FS):(record_length);
     output = sin(2*pi*n*F);
+end
+
+%% CETK notes frequency: 1174.66, 1318.51, 1046.50, 523.25, 783.99
+function [cetk] = cetk(record_length, FS)
+    cetk = zeros;
+    note_durations = [0.5 0.7 1 0.7 4];
+    n = 0:(1/FS):(record_length);
+    f = zeros;
+    f(1:(FS*note_durations(1))) = 1174.66;
+    f((1+FS*note_durations(1)):(FS*note_durations(2))) = 1318.51;
+    f((1+FS*note_durations(2)):(FS*note_durations(3))) = 1046.5;
+    f((1+FS*note_durations(3)):(FS*note_durations(4))) = 523.25;
+    f((1+FS*note_durations(4)):(FS*note_durations(5))) = 783.99;
+    for i = 1:length(f)
+        cetk(i) = sin(pi*f(i)*n(i));
+    end
 end
 
 %% A function that creates a recorder objects and records audio with specified parameters
