@@ -39,7 +39,7 @@ function [input_device_ID, output_device_ID] = get_user_selected_device()
 end
 
 function [chirp] = sine_chirp(record_length, FI, FF, FS)
-    chirp = zeros;
+    cj
     n = 0:(1/FS):(record_length);
     f = linspace (FI, FF, length(n));   
     for i = 1:length(n)
