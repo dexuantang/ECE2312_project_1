@@ -4,37 +4,63 @@ FS = 44100;
 nBits = 8;
 nChannels = 1;
 record_length = 7;
-
-FI = 0;
-FF = 8000;
-
+%% chirp fquencies
+FI = 0; %start
+FF = 8000; %end
+%% filter parameters, Fs are normalized frequencies
+F = [0 0.18 0.18001 1];
+A = [1 1 0 0];
 
 %% Select audio devices
 [user_selected_input_ID, user_slected_output_ID] = get_user_selected_device();
 
 %% generate, save and plot the 5000Hz sine
 sine = sinewave(record_length, 5000, FS);
+sound_blocking(sine, FS, record_length);
+disp('please save the sine wave')
 save_audio_to_wav(sine, FS);
 plot_spectrogram(sine, FS, "Spectrogram of 5000Hz sine");
 
 %% generate and plot 0 to 8000Hz chirp
 chirp = sine_chirp(record_length, FI, FF, FS);
+sound_blocking(chirp, FS, record_length);
+disp('please save the chirp')
+save_audio_to_wav(chirp, FS);
 plot_spectrogram(chirp, FS, "Spectrogram of chirp");
+
 
 %% generate, save, and plot cetk sounds
 cetk_sound = cetk(record_length, FS);
+sound_blocking(cetk_sound, FS, record_length);
+disp('please save the cetk sound')
 save_audio_to_wav(cetk_sound, FS);
 plot_spectrogram(cetk_sound, FS, "Spectrogram of cetk");
 
 
-%% load fox and plot
+%% load fox
 [audio_data_loaded_1,FS_loaded] = load_audio_from_wav();
-plot_spectrogram(audio_data_loaded_1, FS_loaded, "Spectrogram of brown fox");
 
 %% add sine wave to loaded data, save file, and plot
 sine_added = add_sine(audio_data_loaded_1, sine');
+sound_blocking(sine_added, FS, record_length);
+disp('please save the audio with sine added to it')
 save_audio_to_wav(sine_added, FS);
 plot_spectrogram(sine_added, FS_loaded, "Spectrogram of sine added to brown fox");
+
+%% pass the above audio through a LPF
+filtered_audio = LPF(F, A, sine_added);
+sound_blocking(filtered_audio, FS, record_length);
+disp('please save the sine wave')
+save_audio_to_wav(filtered_audio, FS);
+plot_spectrogram(filtered_audio, FS_loaded, "Spectrogram of LPF output audio");
+
+%% stereo audio
+stereo = mono2stereo(audio_data_loaded_1, sine_added);
+sound_blocking(stereo, FS, record_length);
+disp('please save the stereo audio')
+save_audio_to_wav(stereo, FS);
+plot_spectrogram(stereo(:,1), FS, "Spectrogram of stereo left channel");
+plot_spectrogram(stereo(:,2), FS, "Spectrogram of stereo right channel");
 
 %% A function that lets the user select their audio device by typing them in the command window
 function [input_device_ID, output_device_ID] = get_user_selected_device()
@@ -76,13 +102,13 @@ function [cetk] = cetk(record_length, FS)
     f(1:(FS*note_durations(1))) = 2349.32;
     f((1+FS*note_durations(1)):...
         (FS*note_durations(2)+ FS*note_durations(1))) = 2637.02;
-    f((1+FS*(note_durations(1)+note_durations(2))):...
-        FS*(note_durations(1)+note_durations(2)+note_durations(3))) = 2093;
-    f((1+FS*(note_durations(1)+note_durations(2)+note_durations(3))):...
-        FS*(note_durations(1)+note_durations(2)+...
+    f((1+FS*(note_durations(1)+note_durations(2))):FS*...
+        (note_durations(1)+note_durations(2)+note_durations(3))) = 2093;
+    f((1+FS*(note_durations(1)+note_durations(2)+note_durations(3))):FS*...
+        (note_durations(1)+note_durations(2)+...
         note_durations(3)+note_durations(4))) = 1046.5;
-    f((1+FS*(note_durations(1)+note_durations(2)+note_durations(3)+note_durations(4))):...
-        FS*(note_durations(1)+note_durations(2)+...
+    f((1+FS*(note_durations(1)+note_durations(2)+note_durations(3)+note_durations(4))):FS*...
+        (note_durations(1)+note_durations(2)+...
         note_durations(3)+note_durations(4)+note_durations(5))) = 1567.98;
     %% Variable frequency sine
     for i = 1:length(f)
@@ -102,15 +128,12 @@ function [sine_added] = add_sine(voice, sine)
     sine_added = voice + sine;
 end
 
-
-%% A function that creates a recorder objects and records audio with specified parameters
-function [myVoice, audio_data] = record_voice(FS, nBits, nChannels, length, ID)
-    myVoice = audiorecorder(FS, nBits, nChannels, ID);                         %create recorder object
-    disp('Start Recording')                                       
-    record(myVoice, length);                                                   %record
-    pause(length);                                                             %pause executation till record finish
-    audio_data = getaudiodata(myVoice);                                        %put audio data in array
+function filtered = LPF(F,A,audio)
+    lpf = firls(255, F, A);
+    filtered = filter(lpf, A, audio);
 end
+
+
 
 %% A function that plots the spectrogram of a given audio data
 function plot_spectrogram(audio_data, FS, my_title)
@@ -121,16 +144,6 @@ function plot_spectrogram(audio_data, FS, my_title)
     spectrogram(audio_data, window, N_overlap, N_fft, FS, 'yaxis');            %plot it
     ylim([0 8]);                                                               %limit to 8kHz
     title(my_title);                                                           %add custom title
-end
-
-%% A function that converts samples to seconds and does time domain plot
-function plot_time(audio_data,  record_length, my_title)
-    figure;
-    time = linspace (0, record_length, length(audio_data));                    %create time in seconds
-    plot(time, audio_data);                                                    %plot it
-    xlabel("Time(seconds)");                                                   %labels and custom title
-    ylabel("Amplitude");
-    title(my_title);
 end
 
 %% A fucntion that saves audio as a WAV file with GUI
@@ -151,7 +164,39 @@ function [y,FS] = load_audio_from_wav()
     disp("done loading")
 end
 
-%% A function that converts the mono audio to stereo by adding zeros to the right channel
-function audio_data_stereo =  mono2stereo(audio_data)
-    audio_data_stereo = [audio_data zeros(size(audio_data))];
+function sound_blocking(audio, FS, audio_length)
+    sound(audio, FS);
+    pause(audio_length)
 end
+%% A function that converts the mono audio to stereo by adding zeros to the right channel
+function audio_data_stereo =  mono2stereo(ch1, ch2)
+    if length(ch1) > length(ch2)
+        ch1 = ch1(1:length(ch2));
+    elseif length(ch1) < length(ch2)
+        ch2 = ch2(1:length(ch1));
+    end
+    audio_data_stereo(:, 1) = ch1;
+    audio_data_stereo(:, 2) = ch2;
+end
+
+
+%% OLD project1 functions 
+
+% %% A function that converts samples to seconds and does time domain plot
+% function plot_time(audio_data,  record_length, my_title)
+%     figure;
+%     time = linspace (0, record_length, length(audio_data));                    %create time in seconds
+%     plot(time, audio_data);                                                    %plot it
+%     xlabel("Time(seconds)");                                                   %labels and custom title
+%     ylabel("Amplitude");
+%     title(my_title);
+% end
+
+% %% A function that creates a recorder objects and records audio with specified parameters
+% function [myVoice, audio_data] = record_voice(FS, nBits, nChannels, length, ID)
+%     myVoice = audiorecorder(FS, nBits, nChannels, ID);                         %create recorder object
+%     disp('Start Recording')                                       
+%     record(myVoice, length);                                                   %record
+%     pause(length);                                                             %pause executation till record finish
+%     audio_data = getaudiodata(myVoice);                                        %put audio data in array
+% end
