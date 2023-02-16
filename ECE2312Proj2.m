@@ -5,8 +5,8 @@ nBits = 8;
 nChannels = 1;
 record_length = 7;
 %% chirp fquencies
-FI = 0; %start
-FF = 8000; %end
+FI = 0;                                                                      %start
+FF = 8000;                                                                   %end
 %% filter parameters, Fs are normalized frequencies
 F = [0 0.18 0.18001 1];
 A = [1 1 0 0];
@@ -14,14 +14,14 @@ A = [1 1 0 0];
 %% Select audio devices
 [user_selected_input_ID, user_slected_output_ID] = get_user_selected_device();
 
-%% generate, save and plot the 5000Hz sine
+%% 2 generate, save and plot the 5000Hz sine
 sine = sinewave(record_length, 5000, FS);
 sound_blocking(sine, FS, record_length);
 disp('please save the sine wave')
 save_audio_to_wav(sine, FS);
 plot_spectrogram(sine, FS, "Spectrogram of 5000Hz sine");
 
-%% generate and plot 0 to 8000Hz chirp
+%% 3 generate and plot 0 to 8000Hz chirp
 chirp = sine_chirp(record_length, FI, FF, FS);
 sound_blocking(chirp, FS, record_length);
 disp('please save the chirp')
@@ -29,7 +29,7 @@ save_audio_to_wav(chirp, FS);
 plot_spectrogram(chirp, FS, "Spectrogram of chirp");
 
 
-%% generate, save, and plot cetk sounds
+%% 4 generate, save, and plot cetk sounds
 cetk_sound = cetk(record_length, FS);
 sound_blocking(cetk_sound, FS, record_length);
 disp('please save the cetk sound')
@@ -37,24 +37,24 @@ save_audio_to_wav(cetk_sound, FS);
 plot_spectrogram(cetk_sound, FS, "Spectrogram of cetk");
 
 
-%% load fox
+%% 5 load fox
 [audio_data_loaded_1,FS_loaded] = load_audio_from_wav();
 
-%% add sine wave to loaded data, save file, and plot
+%% 6 add sine wave to loaded data, save file, and plot
 sine_added = add_sine(audio_data_loaded_1, sine');
 sound_blocking(sine_added, FS, record_length);
 disp('please save the audio with sine added to it')
 save_audio_to_wav(sine_added, FS);
 plot_spectrogram(sine_added, FS_loaded, "Spectrogram of sine added to brown fox");
 
-%% pass the above audio through a LPF
+%% 7 pass the above audio through a LPF
 filtered_audio = LPF(F, A, sine_added);
 sound_blocking(filtered_audio, FS, record_length);
 disp('please save the sine wave')
 save_audio_to_wav(filtered_audio, FS);
 plot_spectrogram(filtered_audio, FS_loaded, "Spectrogram of LPF output audio");
 
-%% stereo audio
+%% 8 stereo audio
 stereo = mono2stereo(audio_data_loaded_1, sine_added);
 sound_blocking(stereo, FS, record_length);
 disp('please save the stereo audio')
@@ -128,11 +128,11 @@ function [sine_added] = add_sine(voice, sine)
     sine_added = voice + sine;
 end
 
+%% LPF using firls
 function filtered = LPF(F,A,audio)
-    lpf = firls(255, F, A);
+    lpf = firls(255, F, A);                                                    %255 order
     filtered = filter(lpf, A, audio);
 end
-
 
 
 %% A function that plots the spectrogram of a given audio data
@@ -168,7 +168,7 @@ function sound_blocking(audio, FS, audio_length)
     sound(audio, FS);
     pause(audio_length)
 end
-%% A function that converts the mono audio to stereo by adding zeros to the right channel
+%% A function that converts the mono audio to stereo by stacking two mono audios
 function audio_data_stereo =  mono2stereo(ch1, ch2)
     if length(ch1) > length(ch2)
         ch1 = ch1(1:length(ch2));
