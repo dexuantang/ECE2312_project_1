@@ -62,6 +62,9 @@ save_audio_to_wav(stereo, FS);
 plot_spectrogram(stereo(:,1), FS, "Spectrogram of stereo left channel");
 plot_spectrogram(stereo(:,2), FS, "Spectrogram of stereo right channel");
 
+
+
+%% Functions:
 %% A function that lets the user select their audio device by typing them in the command window
 function [input_device_ID, output_device_ID] = get_user_selected_device()
     devices = audiodevinfo;                                                    %get all devices
@@ -178,25 +181,3 @@ function audio_data_stereo =  mono2stereo(ch1, ch2)
     audio_data_stereo(:, 1) = ch1;
     audio_data_stereo(:, 2) = ch2;
 end
-
-
-%% OLD project1 functions 
-
-% %% A function that converts samples to seconds and does time domain plot
-% function plot_time(audio_data,  record_length, my_title)
-%     figure;
-%     time = linspace (0, record_length, length(audio_data));                    %create time in seconds
-%     plot(time, audio_data);                                                    %plot it
-%     xlabel("Time(seconds)");                                                   %labels and custom title
-%     ylabel("Amplitude");
-%     title(my_title);
-% end
-
-% %% A function that creates a recorder objects and records audio with specified parameters
-% function [myVoice, audio_data] = record_voice(FS, nBits, nChannels, length, ID)
-%     myVoice = audiorecorder(FS, nBits, nChannels, ID);                         %create recorder object
-%     disp('Start Recording')                                       
-%     record(myVoice, length);                                                   %record
-%     pause(length);                                                             %pause executation till record finish
-%     audio_data = getaudiodata(myVoice);                                        %put audio data in array
-% end
