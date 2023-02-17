@@ -78,7 +78,7 @@ function [input_device_ID, output_device_ID] = get_user_selected_device()
     output_device_ID = input ('please select output device by typing its ID'); %get user input
 end
 
-%% function that goes chirp chirp
+%% function that generates chirp
 function [chirp] = sine_chirp(record_length, FI, FF, FS)
     chirp = zeros;
     n = 0:(1/FS):(record_length);
