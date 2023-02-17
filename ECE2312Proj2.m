@@ -7,7 +7,7 @@ record_length = 7;
 %% chirp fquencies
 FI = 0;                                                                      %start
 FF = 8000;                                                                   %end
-%% filter parameters, Fs are normalized frequencies
+%% filter parameters, F is a vector of are normalized frequencies
 F = [0 0.18 0.18001 1];
 A = [1 1 0 0];
 
